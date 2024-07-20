@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Mitra</string>
-    <string name="floating_button">floating_button</string>
+    <string name="floating_button">Floating Button</string>
+    <string name="accessibility_service_label">Mitra Accesibility Service Label</string>
     <string name="accessibility_service_description">Description of your accessibility service</string>
+    <string name="screenshot_button_desc">Take Screenshot</string>
 </resources>

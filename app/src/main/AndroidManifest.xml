@@ -1,7 +1,7 @@
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.Mitra">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -25,8 +25,10 @@
         </activity>
 
         <service
-            android:name="com.example.Mitra.ScreenshotAccessibilityService"
+            android:name=".ScreenshotAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:label="@string/accessibility_service_label"
+            android:description="@string/accessibility_service_description"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -36,6 +38,8 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
+
+        <receiver android:name=".NotificationManager$NotificationReceiver"/>
 
     </application>
 
