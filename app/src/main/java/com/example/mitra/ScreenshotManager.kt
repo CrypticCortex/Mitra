@@ -70,8 +70,9 @@ class ScreenshotManager(private val service: AccessibilityService) {
             Toast.makeText(service, "Screenshot saved: $filePath", Toast.LENGTH_SHORT).show()
             Log.d("ScreenshotManager", "Screenshot saved: $filePath")
 
-            // Show the gradient overlay with close button
-            overlayManager.showGradientOverlay()
+            Handler(Looper.getMainLooper()).post {
+                overlayManager.showGradientOverlay()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(service, "Failed to save screenshot", Toast.LENGTH_SHORT).show()

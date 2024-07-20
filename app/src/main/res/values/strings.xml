@@ -5,4 +5,9 @@
     <string name="screenshot_button_desc">Take Screenshot</string>
     <string name="accessibility_service_label">Mitra Accessibility Service</string>
     <string name="close">Close</string>
+    <string name="overlay_message">Screenshot Saved</string>
+    <string name="input_hint">Hi, how can I help you? 👋</string>
+    <string name="send">Send</string>
+    <string name="continue_chat">Continue Chat</string>
+    <string name="new_chat">New Chat</string>
 </resources>
