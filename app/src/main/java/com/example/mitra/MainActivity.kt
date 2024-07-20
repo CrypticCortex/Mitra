@@ -8,6 +8,8 @@ import android.provider.Settings
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 
+import android.content.Context
+import android.util.Log
 private const val REQUEST_OVERLAY_PERMISSIONS_CODE = 1
 
 class MainActivity : AppCompatActivity() {
@@ -15,7 +17,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         val buttonRequestAccessibility = findViewById<Button>(R.id.request_permission_button)
         buttonRequestAccessibility.setOnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
@@ -30,4 +31,6 @@ class MainActivity : AppCompatActivity() {
             ScreenshotAccessibilityService.instance?.showOverlayButton()
         }
     }
+
+
 }

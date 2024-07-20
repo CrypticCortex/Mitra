@@ -10,4 +10,8 @@
     <string name="send">Send</string>
     <string name="continue_chat">Continue Chat</string>
     <string name="new_chat">New Chat</string>
+    <string name="chat_options">How can I help you now? </string>
+    <string name="microphone">Microphone</string>
+    <string name="landing_image_desc">Landing page image</string>
+    <string name="swipe_up_desc">Swipe up icon</string>
 </resources>

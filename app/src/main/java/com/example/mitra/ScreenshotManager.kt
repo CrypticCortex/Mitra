@@ -1,7 +1,6 @@
 package com.example.mitra
 
 import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityService.ScreenshotResult
 import android.accessibilityservice.AccessibilityService.TakeScreenshotCallback
 import android.graphics.Bitmap
 import android.hardware.HardwareBuffer
@@ -18,14 +17,12 @@ import java.util.concurrent.Executor
 
 class ScreenshotManager(private val service: AccessibilityService) {
 
-    private val overlayManager = OverlayManager(service)
-
-    fun takeScreenshot() {
+    fun takeScreenshot(callback: (String) -> Unit) {
         Log.d("ScreenshotManager", "Taking screenshot")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val executor = Executor { command -> Handler(Looper.getMainLooper()).post(command) }
             service.takeScreenshot(Display.DEFAULT_DISPLAY, executor, object : TakeScreenshotCallback {
-                override fun onSuccess(screenshot: ScreenshotResult) {
+                override fun onSuccess(screenshot: AccessibilityService.ScreenshotResult) {
                     Log.d("ScreenshotManager", "Screenshot taken successfully")
                     val hardwareBuffer: HardwareBuffer? = screenshot.hardwareBuffer
                     val colorSpace = screenshot.colorSpace
@@ -33,8 +30,9 @@ class ScreenshotManager(private val service: AccessibilityService) {
                         val bitmap = Bitmap.wrapHardwareBuffer(hardwareBuffer, colorSpace)
                         if (bitmap != null) {
                             Log.d("ScreenshotManager", "Saving bitmap")
-                            saveBitmap(bitmap)
+                            val imagePath = saveBitmap(bitmap)
                             hardwareBuffer.close()
+                            callback(imagePath)
                         } else {
                             Log.e("ScreenshotManager", "Failed to wrap hardware buffer into bitmap")
                         }
@@ -53,7 +51,7 @@ class ScreenshotManager(private val service: AccessibilityService) {
         }
     }
 
-    private fun saveBitmap(bitmap: Bitmap) {
+    private fun saveBitmap(bitmap: Bitmap): String {
         Log.d("ScreenshotManager", "Saving bitmap to file")
         val directory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Mitra")
         if (!directory.exists()) {
@@ -63,20 +61,17 @@ class ScreenshotManager(private val service: AccessibilityService) {
         val filePath = "${directory.absolutePath}/screenshot_${System.currentTimeMillis()}.png"
         val imageFile = File(filePath)
         try {
-            val outputStream = FileOutputStream(imageFile)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-            outputStream.flush()
-            outputStream.close()
+            FileOutputStream(imageFile).use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            }
             Toast.makeText(service, "Screenshot saved: $filePath", Toast.LENGTH_SHORT).show()
             Log.d("ScreenshotManager", "Screenshot saved: $filePath")
-
-            Handler(Looper.getMainLooper()).post {
-                overlayManager.showGradientOverlay()
-            }
+            return filePath
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(service, "Failed to save screenshot", Toast.LENGTH_SHORT).show()
             Log.e("ScreenshotManager", "Failed to save screenshot: ${e.message}")
+            return ""
         }
     }
 }

@@ -6,8 +6,6 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
@@ -32,26 +30,26 @@ class ScreenshotAccessibilityService : AccessibilityService() {
     }
 
     private lateinit var screenshotManager: ScreenshotManager
+    private lateinit var overlayManager: OverlayManager
 
     override fun onServiceConnected() {
         Log.d(TAG, "Service connected")
         instance = this
         screenshotManager = ScreenshotManager(this)
+        overlayManager = OverlayManager(this)  // Initialize OverlayManager
+
         if (!Settings.canDrawOverlays(this)) {
             requestOverlayPermission()
         } else {
             showOverlayButton()
         }
+
         Toast.makeText(this, "Accessibility Service Connected", Toast.LENGTH_SHORT).show()
     }
 
-
     private fun requestOverlayPermission() {
         Log.d(TAG, "Requesting overlay permission")
-        val intent = Intent(
-            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-            Uri.parse("package:$packageName")
-        )
+        val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
@@ -82,10 +80,12 @@ class ScreenshotAccessibilityService : AccessibilityService() {
         val buttonScreenshot = overlayButton.findViewById<ImageView>(R.id.buttonScreenshot)
         buttonScreenshot.setOnClickListener {
             Log.d(TAG, "Overlay button clicked")
-            screenshotManager.takeScreenshot()
+            screenshotManager.takeScreenshot { imagePath ->
+                // Show gradient overlay after the screenshot is taken
+                overlayManager.showGradientOverlay()
+            }
         }
     }
-
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         // No op

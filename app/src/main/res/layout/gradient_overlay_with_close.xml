@@ -17,39 +17,59 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="@string/close"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_button"
+        android:textColor="@color/black"
+        android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/chat_options"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_chat_options"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        android:background="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/button_close"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.85">
 
-        <Button
-            android:id="@+id/button_continue_chat"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/chat_options"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/continue_chat"
-            android:layout_marginBottom="16dp"/>
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <Button
-            android:id="@+id/button_new_chat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/new_chat"/>
-    </LinearLayout>
+            <Button
+                android:id="@+id/button_continue_chat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/continue_chat"
+                android:textSize="18sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginBottom="16dp"/>
+
+            <Button
+                android:id="@+id/button_new_chat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/new_chat"
+                android:textSize="18sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 
     <ScrollView
         android:id="@+id/chat_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/button_close"
+        app:layout_constraintTop_toBottomOf="@id/card_view_chat_options"
         app:layout_constraintBottom_toTopOf="@id/input_container">
 
         <LinearLayout
@@ -82,10 +102,10 @@
             android:background="@null"
             android:hint="@string/input_hint"
             android:textSize="22sp"
-            android:padding="12dp"
-            android:minHeight="60dp"
-            android:inputType="textMultiLine"
-            android:imeOptions="actionSend" />
+        android:padding="12dp"
+        android:minHeight="60dp"
+        android:inputType="textMultiLine"
+        android:imeOptions="actionSend" />
 
         <Button
             android:id="@+id/button_send"
@@ -101,6 +121,5 @@
             android:contentDescription="@string/send" />
 
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

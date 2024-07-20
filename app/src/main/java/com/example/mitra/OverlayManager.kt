@@ -1,5 +1,6 @@
 package com.example.mitra
 
+import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PixelFormat
@@ -15,6 +16,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -30,7 +32,12 @@ class OverlayManager(private val context: Context) {
     private lateinit var chatOptions: View
     private lateinit var chatScrollView: ScrollView
     private lateinit var rootLayout: View
+    private var arrowOverlayView: View? = null
+    private var statusOverlayView: View? = null
+
     private val chatHistory = mutableListOf<String>()
+    private val apiClient = ApiClient(context)
+    private val screenshotManager = ScreenshotManager(context as AccessibilityService)
 
     fun showGradientOverlay() {
         setupWindowManager()
@@ -46,7 +53,8 @@ class OverlayManager(private val context: Context) {
     }
 
     private fun inflateOverlayView() {
-        overlayView = LayoutInflater.from(context).inflate(R.layout.gradient_overlay_with_close, null)
+        overlayView =
+            LayoutInflater.from(context).inflate(R.layout.gradient_overlay_with_close, null)
     }
 
     private fun setupViews() {
@@ -146,6 +154,7 @@ class OverlayManager(private val context: Context) {
             processMessage(text)
             clearInputField()
             scrollToBottom()
+            sendApiRequest(text)
         }
     }
 
@@ -226,9 +235,138 @@ class OverlayManager(private val context: Context) {
         }, 100)
     }
 
+    private fun sendApiRequest(prompt: String) {
+        screenshotManager.takeScreenshot { imagePath ->
+            apiClient.sendImageCompletionRequest(
+                prompt,
+                imagePath
+            ) { showArrow, status, rotation, xAxis, yAxis ->
+                rootLayout.visibility = View.GONE // Hide gradient overlay and other components
+                showStatusOverlay(status) // Always show the status overlay
+                if (showArrow) {
+                    showArrowOverlay(xAxis, yAxis, rotation)
+                }
+            }
+        }
+    }
+
+    private fun showArrowOverlay(x: Int, y: Int, rotation: String) {
+        arrowOverlayView = LayoutInflater.from(context).inflate(R.layout.arrow_overlay, null)
+        val arrowImageView = arrowOverlayView?.findViewById<ImageView>(R.id.arrow_image)
+
+        // Set rotation based on the `rotation` field from the API
+        val rotationAngle = when (rotation) {
+            "right" -> 90f
+            "left" -> -90f
+            "up" -> 0f
+            "upsidedown" -> 180f
+            "bottomRight" -> 135f
+            "bottomLeft" -> -135f
+            "upRight" -> 45f
+            "upLeft" -> -45f
+            else -> 0f
+        }
+        arrowImageView?.rotation = rotationAngle
+
+        // Blink arrow image 5 times
+        val blinkHandler = Handler(Looper.getMainLooper())
+        val blinker = object : Runnable {
+            var isVisible = true
+            var blinkCount = 0
+
+            override fun run() {
+                if (blinkCount < 5) {
+                    arrowImageView?.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
+                    isVisible = !isVisible
+                    blinkCount++
+                    blinkHandler.postDelayed(this, 500)
+                } else {
+                    arrowImageView?.visibility = View.VISIBLE
+                }
+            }
+        }
+        blinkHandler.post(blinker)
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                WindowManager.LayoutParams.TYPE_PHONE
+            },
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            this.x = x
+            this.y = y
+        }
+
+        arrowOverlayView?.setOnTouchListener { _, _ ->
+            removeArrowOverlay()
+            true
+        }
+
+        windowManager.addView(arrowOverlayView, params)
+    }
+
+    private fun showStatusOverlay(status: String) {
+        statusOverlayView = LayoutInflater.from(context).inflate(R.layout.status_overlay, null)
+        statusOverlayView?.findViewById<TextView>(R.id.status_text)?.text = status
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                WindowManager.LayoutParams.TYPE_PHONE
+            },
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.CENTER
+        }
+
+        statusOverlayView?.setOnTouchListener { _, _ ->
+            removeStatusOverlay()
+            true
+        }
+
+        windowManager.addView(statusOverlayView, params)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (statusOverlayView?.isAttachedToWindow == true) {
+                windowManager.removeView(statusOverlayView)
+                statusOverlayView = null
+            }
+        }, 5000)
+    }
+
+    private fun removeArrowOverlay() {
+        if (arrowOverlayView != null && arrowOverlayView?.isAttachedToWindow == true) {
+            windowManager.removeView(arrowOverlayView)
+            arrowOverlayView = null
+        }
+    }
+
+    private fun removeStatusOverlay() {
+        if (statusOverlayView != null && statusOverlayView?.isAttachedToWindow == true) {
+            windowManager.removeView(statusOverlayView)
+            statusOverlayView = null
+        }
+    }
+
     fun removeGradientOverlay() {
         if (::overlayView.isInitialized && overlayView.isAttachedToWindow) {
             windowManager.removeView(overlayView)
         }
     }
+
+    private fun removeOtherOverlays() {
+        removeArrowOverlay()
+        removeStatusOverlay()
+    }
+
 }
