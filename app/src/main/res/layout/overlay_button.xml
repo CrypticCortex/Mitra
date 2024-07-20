@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:background="@drawable/circular_background">
+
+    <ImageView
+        android:id="@+id/buttonScreenshot"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_screenshot_button"
+        android:contentDescription="@string/screenshot_button_desc"/>
+</FrameLayout>
