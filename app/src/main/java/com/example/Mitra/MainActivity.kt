@@ -1,4 +1,4 @@
-package com.example.smartseniors
+package com.example.Mitra
 
 import android.content.Intent
 import android.os.Bundle

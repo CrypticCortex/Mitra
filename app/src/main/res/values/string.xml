@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartSeniors</string>
+    <string name="app_name">Mitra</string>
     <string name="floating_button">floating_button</string>
     <string name="accessibility_service_description">Description of your accessibility service</string>
 </resources>

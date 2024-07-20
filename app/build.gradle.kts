@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.smartseniors"
+    namespace = "com.example.Mitra"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.smartseniors"
+        applicationId = "com.example.mitra"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
